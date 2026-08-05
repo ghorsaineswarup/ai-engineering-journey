@@ -12,18 +12,24 @@ headers = {
     "Content-Type": "application/json"
 }
 
-data = {
-    "model": "llama-3.1-8b-instant",
-    "messages": [
-        {"role": "user", "content": "What is 2+2?"}
-    ]
-}
+while True:
+    user_input = input("You: ")
 
-response = requests.post(url, headers=headers, json=data)
+    if user_input.lower() == "quit":
+        print("Goodbye!")
+        break
 
-print("Status code:", response.status_code)
-print("Response:", response.text)
+    data = {
+        "model": "llama-3.1-8b-instant",
+        "messages": [
+            {"role": "user", "content": user_input}
+        ]
+    }
 
-result = response.json()
-answer = result["choices"][0]["message"]["content"]
-print("AI's answer:", answer)
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        result = response.json()
+        answer = result["choices"][0]["message"]["content"]
+        print("AI:", answer)
+    except requests.exceptions.RequestException as e:
+        print("Error:", e)
