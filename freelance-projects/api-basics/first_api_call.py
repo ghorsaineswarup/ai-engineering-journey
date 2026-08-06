@@ -12,8 +12,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-# Conversation memory
-messages = []
+conversation_history = []
 
 while True:
     user_input = input("You: ")
@@ -22,29 +21,20 @@ while True:
         print("Goodbye!")
         break
 
-    # Remember user's message
-    messages.append({
-        "role": "user",
-        "content": user_input
-    })
+    conversation_history.append({"role": "user", "content": user_input})
 
     data = {
         "model": "llama-3.1-8b-instant",
-        "messages": messages
+        "messages": conversation_history
     }
 
     try:
         response = requests.post(url, headers=headers, json=data)
         result = response.json()
         answer = result["choices"][0]["message"]["content"]
-
         print("AI:", answer)
 
-        # Remember AI's reply
-        messages.append({
-            "role": "assistant",
-            "content": answer
-        })
+        conversation_history.append({"role": "assistant", "content": answer})
 
     except requests.exceptions.RequestException as e:
         print("Error:", e)
