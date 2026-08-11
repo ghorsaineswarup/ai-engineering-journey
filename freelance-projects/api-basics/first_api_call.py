@@ -12,8 +12,20 @@ headers = {
     "Content-Type": "application/json"
 }
 
+
+def normalize_word(word):
+    replacements = {
+        "litre": "liter",
+        "colour": "color",
+        "centre": "center"
+    }
+    return replacements.get(word, word)
+
+
 def clean_word(word):
-    return ''.join(char for char in word if char.isalnum())
+    cleaned = ''.join(char for char in word if char.isalnum())
+    return normalize_word(cleaned)
+
 
 def find_best_chunk(questions, chunks):
     question_words = [clean_word(w) for w in questions.lower().split()]
@@ -25,7 +37,7 @@ def find_best_chunk(questions, chunks):
         for word in question_words:
             if word in chunk_words:
                 score += 1
-        print(f"Chunk: '{chunk}' | Score: {score}")           
+        print(f"Chunk: '{chunk}' | Score: {score}")
         if score > best_score:
             best_score = score
             best_chunk = chunk
@@ -39,8 +51,7 @@ chunks = [
     "Our shop is open Monday to Saturday, 7 AM to 7 PM."
 ]
 
-
-conversation_history = [{"role": "system", "content": "You are a helpful assistant for Udhamsil Dairy Tatha Sahakari, located in Kolhavi-2, Bara, Nepal. The dairy sells milk, milk powder, ghee, paneer, curd, and other milk-related products. Help customers with questions about products, prices, availability, and orders. If asked about anything unrelated to the dairy or its products, politely redirect the conversation back to the dairy."}]
+conversation_history = [{"role": "system", "content": "You are a helpful assistant for Udhamsil Dairy Tatha Sahakari, located in Kolhavi-2, Bara, Nepal. You will be given context information before each question. You MUST answer using ONLY the facts in that context - do not add, guess, or invent any details not explicitly stated. Answer directly and confidently using the exact information given. If the context does not contain the answer, say 'I don't have that information right now, but I can find out for you.'"}]
 
 while True:
     user_input = input("You: ")
@@ -56,11 +67,10 @@ while True:
     else:
         context_message = user_input
 
-    print("DEBUG - Sending to AI:",context_message)
+    print("DEBUG - Sending to AI:", context_message)
 
-        
+    conversation_history.append({"role": "user", "content": context_message})
 
-    context_message = f"here is some relevant information: {relevant_chunk}\n\nQuestion: {user_input}"
     data = {
         "model": "llama-3.1-8b-instant",
         "messages": conversation_history
